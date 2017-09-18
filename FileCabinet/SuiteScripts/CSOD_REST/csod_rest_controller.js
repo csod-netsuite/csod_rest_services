@@ -1,4 +1,6 @@
-define(['N/error', './Http_Service_Libraries/CSOD_POST_Services'], function (error, CSOD_POST) {
+define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Service_Libraries/CSOD_GET_Services'
+    ,'./Http_Service_Libraries/CSOD_GET_Exchange_Rate_Service'],
+    function (error, CSOD_POST, CSOD_GET, CSOD_EX_RATE) {
 
     /**
      * Module Description...
@@ -9,15 +11,17 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services'], function (err
      * @author Chan cyi@csod.com
      *
      * @NApiVersion 2.x
-     * @NModuleScope SameAccount
+     * @NModuleScope Public
      * @NScriptType RESTlet
      */
     var exports = {};
 
     // Action reference table
     const ACTIONS = {
-        MAVENLINK : '1'
-    }
+        MAVENLINK : '1',
+        CHECK_CUSTOMER_ID: '2',
+        EXCHANGE_RATE: '3'
+    };
 
     function _get(context) {
         if(!context.hasOwnProperty('action')) {
@@ -27,9 +31,45 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services'], function (err
             });
         }
 
-        var output = {};
+        var output;
+
+        if(context.action == ACTIONS.CHECK_CUSTOMER_ID) {
+            log.debug({
+                title: "RESTlet Action 2 Called",
+                details: context.internalId
+            });
+
+            var customerId = context.internalId || '';
+
+            //return Salesforce ID in return
+            if(customerId !== ''){
+                output = CSOD_GET.getSalesForceID(customerId);
+            } else {
+                output = { message: "Empty" }
+            }
+
+
+        } else if(context.action == ACTIONS.EXCHANGE_RATE) {
+            var effectiveDateStart = context.startDate;
+            var effectiveDateEnd = context.endDate;
+            var currencySymbol = context.currency;
+
+            if(!currencySymbol) {
+                output = { success: false, message: "Currency Symbol is required" };
+
+            } else {
+                output = CSOD_EX_RATE.getExchangeRate(currencySymbol, effectiveDateStart, effectiveDateEnd);
+            }
+
+        }
+
         // route to different method
 
+        log.debug({
+            title: "Output check",
+            details: output
+        });
+        return JSON.stringify(output);
     }
 
     function _post(requestBody) {
@@ -40,7 +80,7 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services'], function (err
             title: 'resquestBody',
             details: requestBody
         });
-
+        //@TODO validate action id
         // Routing to different services
         response = CSOD_POST.mavenlinkDataProcess(requestBody);
 

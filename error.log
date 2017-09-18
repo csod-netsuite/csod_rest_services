@@ -63,3 +63,11 @@ java.lang.Exception: You have entered an invalid email address or password. Plea
 	at java.lang.reflect.Method.invoke(Method.java:498)
 	at org.codehaus.mojo.exec.ExecJavaMojo$1.run(ExecJavaMojo.java:294)
 	at java.lang.Thread.run(Thread.java:745)
+2017-08-01 15:02:32,762 - Warnings for file /Users/Chan/Documents/workspace/CSOD_REST_Services/Objects/customscript_csod_rs_service_ctrl.xml.
+2017-08-01 15:02:32,763 -     - Line No. 17 - Error Message: The "allpartners" field depends on the "CRM" feature. The manifest must define the "CRM" feature as required or optional.
+2017-09-07 13:20:59,181 - *** ERROR ***
+2017-09-07 13:20:59,182 - 
+2017-09-07 13:20:59,182 - A file upload error occurred.
+2017-09-07 13:20:59,182 - Details: com.netledger.common.exceptions.NLUserError: SuiteScript 2.0 entry point scripts must implement one script type function.
+2017-09-07 13:20:59,182 - File: ~/FileCabinet/SuiteScripts/CSOD_REST/Http_Service_Libraries/CSOD_GET_Services.js
+2017-09-07 13:20:59,182 - 2017-09-07 13:20:59 (PST) Installation FAILED (0 minutes 2 seconds)
