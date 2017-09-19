@@ -1,6 +1,6 @@
 define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Service_Libraries/CSOD_GET_Services'
-    ,'./Http_Service_Libraries/CSOD_GET_Exchange_Rate_Service'],
-    function (error, CSOD_POST, CSOD_GET, CSOD_EX_RATE) {
+    ,'./Http_Service_Libraries/CSOD_GET_Exchange_Rate_Service', './Http_Service_Libraries/lodash'],
+    function (error, CSOD_POST, CSOD_GET, CSOD_EX_RATE, _) {
 
     /**
      * Module Description...

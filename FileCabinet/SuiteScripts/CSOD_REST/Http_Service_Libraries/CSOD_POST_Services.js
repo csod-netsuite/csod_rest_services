@@ -1,4 +1,4 @@
-define(['N/https'], function (https) {
+define(['N/https', './lodash'], function (https, _) {
 
     /**
      * Module Description...
@@ -23,7 +23,12 @@ define(['N/https'], function (https) {
         var stories = data.stories;
         var workspaces = data.workspaces;
         
-        var customFieldKeys = getAllCustomFields(WORKSPACE_CF_SETS);
+        var customFieldObj = getAllCustomFields(WORKSPACE_CF_SETS);
+
+        log.debug({
+            title: 'customFieldObj',
+            details: customFieldObj
+        });
 
         // the call is to transform stories
         if(stories !== undefined) {
@@ -49,7 +54,7 @@ define(['N/https'], function (https) {
                     tempObj[workspaceProp] = workspace[workspaceProp];
                 }
 
-                tempObj = attachCustomFields(tempObj, 'Workspace');
+                tempObj = attachCustomFields(tempObj, customFieldObj, 'Workspace');
 
                 output.push(tempObj);
             }
@@ -58,73 +63,81 @@ define(['N/https'], function (https) {
         return output;
     };
 
-    var attachCustomFields = function(obj, rec) {
+    var attachCustomFields = function(obj, custObj, rec) {
         var url = "https://api.mavenlink.com/api/v1/custom_field_values.json?subject_type=" + rec
             + "&with_subject_id=" + obj.id;
-        var headers = {
-            Authorization: MAVENLINK_AUTH
-        };
-        var response = https.get({
-            url: url,
-            headers: headers
-        });
 
-        log.debug({
-            title: "Response code",
-            details: response.code
-        });
+        var newObj = _.assign(obj, custObj)
+
+        var response = callMavenLink(url);
+
+        // log.debug({
+        //     title: "Response code",
+        //     details: response.code
+        // });
 
         if(response.code == 200 || response.code == '200') {
             var body = JSON.parse(response.body);
             var customFields = body.custom_field_values;
 
-            log.debug({
-                title: 'Response from MavenLink',
-                details: customFields
-            });
+            // log.debug({
+            //     title: 'Response from MavenLink',
+            //     details: customFields
+            // });
             
             for(var workspaceId in customFields) {
-            	log.debug({
-            		title: 'In customFields ' + workspaceId,
-            		details: customFields[workspaceId]
-            	});
+            	// log.debug({
+            	// 	title: 'In customFields ' + workspaceId,
+            	// 	details: customFields[workspaceId]
+            	// });
             	
             	var customField = customFields[workspaceId];
-            	
-            	
-            	obj[customField['custom_field_name']] = customField['display_value'];
-            	
-            	
+
+                newObj[customField['custom_field_name']] = customField['display_value'];
+
             }
             
-            return obj;
+            return newObj;
         }
 
     };
+
+    var callMavenLink = function(url) {
+
+        var headers = {
+            Authorization: MAVENLINK_AUTH
+        };
+
+        var response = https.get({
+            url: url,
+            headers: headers
+        });
+
+        return response;
+    }
     
     var getAllCustomFields = function(validSets) {
     	
     	var customFieldsKeys = [];
     	var output = {};
-    	var url = "https://api.mavenlink.com/api/v1/custom_fields.json";
-    	var headers = {
-    		Authorization: MAVENLINK_AUTH	
-    	};
-    	
-    	var response = https.get({
-    		url: url,
-    		headers: headers
-    	});
-    	
+        var url = "https://api.mavenlink.com/api/v1/custom_fields.json";
+    	var response = callMavenLink(url);
+
     	if(response.code == 200 || response.code == "200") {
     		var responseBody = JSON.parse(response.body);
-    		var customFields = responseBody.custom_fields;
+            var customFieldsNum = responseBody.count;
+
+            var newURL = url + '?per_page=' + customFieldsNum;
+
+            var pagedResponse = callMavenLink(newURL);
+            var newResponseBody = JSON.parse(pagedResponse.body);
+
+    		var customFields = newResponseBody.custom_fields;
     		for (var i in customFields) {
     			if(validSets.indexOf(customFields[i].custom_field_set_id) > -1) {
-    				customFieldsKeys.push(customFieldsKeys[i].name);
+    				customFieldsKeys.push(customFields[i].name);
     			}
     		}
-    		
     	}
     	
     	if(customFieldsKeys.length > 0) {
@@ -137,7 +150,9 @@ define(['N/https'], function (https) {
     		title: "New Custom Fields Object",
     		details: output
     	});
-    	
+
+    	return output;
+
     };
 
     exports.mavenlinkDataProcess = mavenlinkDataProcess;
