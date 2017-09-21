@@ -114,7 +114,7 @@ define(['N/https', './lodash'], function (https, _) {
         });
 
         return response;
-    }
+    };
     
     var getAllCustomFields = function(validSets) {
     	
