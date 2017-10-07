@@ -13,12 +13,14 @@ define(['N/https', './lodash'], function (https, _) {
      */
     var exports = {};
     
-    var MAVENLINK_AUTH = 'bearer 3e5d1d56e12c84391d8e3e01aca89fec057d122870d92e394a2dc13ad29a1e69'
+    var MAVENLINK_AUTH = 'bearer 6db0e0bc77ecaa427697d0845692395d822f56d057fe22ea30ec184f79b7887c';
 
     // parses and restructures JSON
     var mavenlinkDataProcess = function(data) {
         var output = [];
-        var WORKSPACE_CF_SETS = ["9855", "9885", "122315"];
+
+        // TODO this is hardcoded CustomFieldSet
+        var WORKSPACE_CF_SETS = ["9855", "9885", "122315", "6005"];
         
         var stories = data.stories;
         var workspaces = data.workspaces;
