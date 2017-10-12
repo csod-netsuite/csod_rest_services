@@ -1,6 +1,6 @@
 define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Service_Libraries/CSOD_GET_Services'
-    ,'./Http_Service_Libraries/CSOD_GET_Exchange_Rate_Service', './Http_Service_Libraries/lodash'],
-    function (error, CSOD_POST, CSOD_GET, CSOD_EX_RATE, _) {
+    ,'./Http_Service_Libraries/CSOD_GET_Exchange_Rate_Service', './Http_Service_Libraries/lodash', 'N/file'],
+    function (error, CSOD_POST, CSOD_GET, CSOD_EX_RATE, _, file) {
 
     /**
      * Module Description...
@@ -20,7 +20,8 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
     const ACTIONS = {
         MAVENLINK : '1',
         CHECK_CUSTOMER_ID: '2',
-        EXCHANGE_RATE: '3'
+        EXCHANGE_RATE: '3',
+        POST_CSV: '4'
     };
 
     function _get(context) {
@@ -73,9 +74,10 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
     }
 
     function _post(requestBody) {
-
+    	
+    	
         var response = {};
-
+        
         log.debug({
             title: 'resquestBody',
             details: requestBody

@@ -49,6 +49,8 @@ define(['N/https', './lodash'], function (https, _) {
         // the call is to parse workspaces
         if(workspaces !== undefined) {
             for(var prop in workspaces) {
+            	
+            	
                 var tempObj = {};
                 var workspace = workspaces[prop];
 
@@ -57,12 +59,35 @@ define(['N/https', './lodash'], function (https, _) {
                 }
 
                 tempObj = attachCustomFields(tempObj, customFieldObj, 'Workspace');
+                
+                var storyObj = getDataFromStory(prop);
+                
+                log.debug({
+                	title: 'storyObj',
+                	details: storyObj
+                });
 
                 output.push(tempObj);
             }
         }
 
         return output;
+    };
+    
+    var getDataFromStory = function(workspaceId) {
+    	var url = "https://api.mavenlink.com/api/v1/stories.json?all_on_account=true&workspace_id=" + 
+    		workspaceId + "&page=1&per_page=200";
+    	
+    	var storyObj = callMavenLink(url);
+    	
+    	
+    	log.debug({
+    		title: 'StoryObj count',
+    		details: storyObj.count
+    	});
+    	
+    	return storyObj;
+    	
     };
 
     var attachCustomFields = function(obj, custObj, rec) {
