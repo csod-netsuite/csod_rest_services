@@ -78,15 +78,27 @@ define(['N/https', './lodash'], function (https, _) {
     	var url = "https://api.mavenlink.com/api/v1/stories.json?all_on_account=true&workspace_id=" + 
     		workspaceId + "&page=1&per_page=200";
     	
-    	var storyObj = callMavenLink(url);
+    	var response = callMavenLink(url);
     	
+    	if(response.code == 200 || response.code == '200') {
+    		var body = JSON.parse(response.body);
+    		
+    		var stories = body.stories;
+    		
+    		
+    		
+    		//TODO sort and count milestone and task (story_type)
+    		
+    		//TODO get time milestone weight (1 being complete), get state: completed / total milestone count
+    		
+    	}
     	
     	log.debug({
     		title: 'StoryObj count',
     		details: storyObj.count
     	});
     	
-    	return storyObj;
+    	
     	
     };
 
