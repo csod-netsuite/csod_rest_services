@@ -79,15 +79,60 @@ define(['N/https', './lodash'], function (https, _) {
     		workspaceId + "&page=1&per_page=200";
     	
     	var response = callMavenLink(url);
+
+    	// object to return
+    	var tempObj = {
+    	    total_tasks_count: 0,
+            completed_tasks_count: 0,
+            milestone_weight_complete_percent: 0
+        };
     	
     	if(response.code == 200 || response.code == '200') {
     		var body = JSON.parse(response.body);
-    		
+    		var count = body.count;
     		var stories = body.stories;
-    		
-    		
-    		
+
+    		// setting total count
+    		tempObj.total_tasks_count = count;
+
     		//TODO sort and count milestone and task (story_type)
+            var milestoneCount = 0;
+            var taskCount = 0;
+            var milestones = [];
+            var storiesArr = [];
+
+            for(id in stories) {
+                var story = stories[id];
+                storiesArr.push(story);
+
+                for(key in story){
+                    if(key == 'story_type') {
+                        if(story[key] == 'milestone') {
+                            milestoneCount += 1;
+                        } else {
+                            taskCount += 1;
+                        }
+                    }
+                }
+            }
+
+            var completedTasks = storiesArr.filter(function(story) {
+               return story['state'] == 'completed';
+            });
+
+            var completedMilestones = completedTasks.filter(function(story) {
+               return story['story_type'] == 'milestone';
+            });
+
+            if(completedMilestones.length > 0 && milestoneCount > 0) {
+                var myLove = +(completedMilestones.length/milestoneCount).toFixed(2);
+
+            }
+
+            tempObj.completed_tasks_count = completedTasks.length;
+
+
+
     		
     		//TODO get time milestone weight (1 being complete), get state: completed / total milestone count
     		
