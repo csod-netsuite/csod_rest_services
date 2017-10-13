@@ -75,8 +75,9 @@ define(['N/https', './lodash'], function (https, _) {
     };
     
     var getDataFromStory = function(workspaceId) {
+    	var page = 1;
     	var url = "https://api.mavenlink.com/api/v1/stories.json?all_on_account=true&workspace_id=" + 
-    		workspaceId + "&page=1&per_page=200";
+    		workspaceId + "&page=" + page + "&per_page=200";
     	
     	var response = callMavenLink(url);
 
@@ -88,10 +89,26 @@ define(['N/https', './lodash'], function (https, _) {
         };
     	
     	if(response.code == 200 || response.code == '200') {
-    		var body = JSON.parse(response.body);
-    		var count = body.count;
-    		var stories = body.stories;
-
+    		var data = [JSON.parse(response.body)];
+    		var count = data[0].count;
+    		
+    		
+    		// check if count is bigger than 200
+    		var dataSize = Math.ceil(count / 200);
+    		if((dataSize) > 1) {
+    			
+    			for(var i = 2; i <= dataSize; i++) {
+    				page = i;
+    				url = "https://api.mavenlink.com/api/v1/stories.json?all_on_account=true&workspace_id=" + 
+    	    		workspaceId + "&page=" + page + "&per_page=200";
+    				response = callMavenLink(url);
+    				var parsedResponse = JSON.parse(response.body);
+    				data.push(parsedResponse);
+    				count += parsedResponse.count;
+    			}
+    			
+    		}
+    		
     		// setting total count
     		tempObj.total_tasks_count = count;
 
@@ -100,21 +117,27 @@ define(['N/https', './lodash'], function (https, _) {
             var taskCount = 0;
             var milestones = [];
             var storiesArr = [];
+            
+            for(var x = 0; x < data.length; x++) {
+            	
+            	var stories = data[x].stories;
+            	
+            	for(id in stories) {
+                    var story = stories[id];
+                    storiesArr.push(story);
 
-            for(id in stories) {
-                var story = stories[id];
-                storiesArr.push(story);
-
-                for(key in story){
-                    if(key == 'story_type') {
-                        if(story[key] == 'milestone') {
-                            milestoneCount += 1;
-                        } else {
-                            taskCount += 1;
+                    for(key in story){
+                        if(key == 'story_type') {
+                            if(story[key] == 'milestone') {
+                                milestoneCount += 1;
+                            } else {
+                                taskCount += 1;
+                            }
                         }
                     }
                 }
             }
+            
 
             var completedTasks = storiesArr.filter(function(story) {
                return story['state'] == 'completed';
@@ -130,18 +153,17 @@ define(['N/https', './lodash'], function (https, _) {
             }
 
             tempObj.completed_tasks_count = completedTasks.length;
+            tempObj.milestone_weight_complete_percent = myLove;
 
-
-
+            log.debug({
+            	title: "Stories Logic Check",
+            	details: tempObj
+            });
     		
     		//TODO get time milestone weight (1 being complete), get state: completed / total milestone count
     		
     	}
     	
-    	log.debug({
-    		title: 'StoryObj count',
-    		details: storyObj.count
-    	});
     	
     	
     	
