@@ -73,7 +73,12 @@ define(['N/https', './lodash'], function (https, _) {
 
         return output;
     };
-    
+
+    /**
+     * Gets rollup data for Stories and Time Entries
+     * @param workspaceId
+     * @returns {{total_tasks_count: number, completed_tasks_count: number, milestone_weight_complete_percent: number, total_time_logged: number, total_cost: number}}
+     */
     var getDataFromStory = function(workspaceId) {
     	var page = 1;
     	var url = "https://api.mavenlink.com/api/v1/stories.json?all_on_account=true&workspace_id=" + 
@@ -85,13 +90,14 @@ define(['N/https', './lodash'], function (https, _) {
     	var tempObj = {
     	    total_tasks_count: 0,
             completed_tasks_count: 0,
-            milestone_weight_complete_percent: 0
+            milestone_weight_complete_percent: 0,
+            total_time_logged: 0,
+            total_cost: 0
         };
     	
     	if(response.code == 200 || response.code == '200') {
     		var data = [JSON.parse(response.body)];
     		var count = data[0].count;
-    		
     		
     		// check if count is bigger than 200
     		var dataSize = Math.ceil(count / 200);
@@ -137,7 +143,6 @@ define(['N/https', './lodash'], function (https, _) {
                     }
                 }
             }
-            
 
             var completedTasks = storiesArr.filter(function(story) {
                return story['state'] == 'completed';
@@ -149,24 +154,93 @@ define(['N/https', './lodash'], function (https, _) {
 
             if(completedMilestones.length > 0 && milestoneCount > 0) {
                 var myLove = +(completedMilestones.length/milestoneCount).toFixed(2);
-
             }
+
 
             tempObj.completed_tasks_count = completedTasks.length;
             tempObj.milestone_weight_complete_percent = myLove;
+
+            // get Total Time Logged by calling another URL
+            var timeEntryOutput = getTotalTimeLogged(workspaceId);
+            timeObj.total_time_logged = timeEntryOutput.total_hours;
+            timeObj.total_cost = timeEntryOutput.total_cost_rate;
 
             log.debug({
             	title: "Stories Logic Check",
             	details: tempObj
             });
-    		
-    		//TODO get time milestone weight (1 being complete), get state: completed / total milestone count
-    		
+
     	}
-    	
-    	
-    	
-    	
+
+    	return tempObj;
+
+    };
+
+    /**
+     * Calling Time Entries endpoint to get Total Time Logged
+     * @param workspaceId
+     * @returns {{total_hours: number, total_cost_rate: number}}
+     */
+    var getTotalTimeLogged = function(workspaceId) {
+        var page = 1;
+        var url = "https://api.mavenlink.com/api/v1/time_entries.json?workspace_id="
+            + workspaceId +"&page=" + page + "&per_page=200";
+
+        var response = callMavenLink(url);
+        if(response.code === 200 || response.code === "200") {
+            var data = [JSON.stringify(response.body)];
+            var count = data[0].count;
+            var dataSize = +Math.ceil(count/200);
+
+            if(dataSize > 1) {
+                for(page = 2; page <= dataSize; page++) {
+                    url = "https://api.mavenlink.com/api/v1/time_entries.json?workspace_id="
+                        + workspaceId +"&page=" + page + "&per_page=200";
+
+                    response = callMavenLink(url);
+
+                    if(response.code === 200 || response.code === '200'){
+                        data.push(JSON.stringify(response.body));
+                    } else {
+                        log.error({
+                            title: 'Error during ' + url,
+                            details: response
+                        });
+                    }
+
+                }
+            }
+
+            var entries = [];
+            var output = {
+                total_hours: 0,
+                total_cost_rate: 0
+            };
+            // push all entries to entries array
+            for(var i = 0; i < data.length; i++) {
+                var objs = data[i];
+                var entryObj = objs['time_entries'];
+                for(id in entryObj) {
+                    entries.push(entryObj[id]);
+                }
+            }
+
+            if(entries.length > 0) {
+                var myObj = _.reduce(entries, function(obj, entry) {
+                    obj.total_minutes += entry.time_in_minutes;
+                    obj.total_cost_cents += entry.total_cost_cents;
+                    return obj;
+                }, {
+                    total_minutes: 0,
+                    total_cost_cents: 0
+                });
+
+                output.total_hours = +(myObj.total_minutes/60).toFixed(2);
+                output.total_cost_rate = +(myObj.total_cost_cents/100).toFixed(2);
+            }
+
+            return output;
+        }
     };
 
     var attachCustomFields = function(obj, custObj, rec) {
@@ -214,10 +288,14 @@ define(['N/https', './lodash'], function (https, _) {
             Authorization: MAVENLINK_AUTH
         };
 
-        var response = https.get({
-            url: url,
-            headers: headers
-        });
+        try {
+            var response = https.get({
+                url: url,
+                headers: headers
+            });
+        } catch(e) {
+            response = e.toString();
+        }
 
         return response;
     };
