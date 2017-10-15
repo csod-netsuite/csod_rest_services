@@ -51,8 +51,8 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
 
 
         } else if(context.action == ACTIONS.EXCHANGE_RATE) {
-            var effectiveDateStart = context.startDate;
-            var effectiveDateEnd = context.endDate;
+            var effectiveDateStart = context.startDate || context.startdate;
+            var effectiveDateEnd = context.endDate || context.enddate;
             var currencySymbol = context.currency;
 
             if(!currencySymbol) {

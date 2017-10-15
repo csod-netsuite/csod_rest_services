@@ -61,7 +61,12 @@ define(['N/https', './lodash'], function (https, _) {
                 tempObj = attachCustomFields(tempObj, customFieldObj, 'Workspace');
                 
                 var storyObj = getDataFromStory(prop);
-                
+
+                log.debug({
+                    title: 'tempObj',
+                    details: tempObj
+                });
+
                 log.debug({
                 	title: 'storyObj',
                 	details: storyObj
@@ -162,13 +167,9 @@ define(['N/https', './lodash'], function (https, _) {
 
             // get Total Time Logged by calling another URL
             var timeEntryOutput = getTotalTimeLogged(workspaceId);
-            timeObj.total_time_logged = timeEntryOutput.total_hours;
-            timeObj.total_cost = timeEntryOutput.total_cost_rate;
 
-            log.debug({
-            	title: "Stories Logic Check",
-            	details: tempObj
-            });
+            tempObj.total_time_logged = timeEntryOutput.total_hours;
+            tempObj.total_cost = timeEntryOutput.total_cost_rate;
 
     	}
 
@@ -187,8 +188,9 @@ define(['N/https', './lodash'], function (https, _) {
             + workspaceId +"&page=" + page + "&per_page=200";
 
         var response = callMavenLink(url);
+
         if(response.code === 200 || response.code === "200") {
-            var data = [JSON.stringify(response.body)];
+            var data = [JSON.parse(response.body)];
             var count = data[0].count;
             var dataSize = +Math.ceil(count/200);
 
@@ -200,7 +202,7 @@ define(['N/https', './lodash'], function (https, _) {
                     response = callMavenLink(url);
 
                     if(response.code === 200 || response.code === '200'){
-                        data.push(JSON.stringify(response.body));
+                        data.push(JSON.parse(response.body));
                     } else {
                         log.error({
                             title: 'Error during ' + url,
@@ -216,19 +218,22 @@ define(['N/https', './lodash'], function (https, _) {
                 total_hours: 0,
                 total_cost_rate: 0
             };
+
             // push all entries to entries array
             for(var i = 0; i < data.length; i++) {
                 var objs = data[i];
                 var entryObj = objs['time_entries'];
+
                 for(id in entryObj) {
                     entries.push(entryObj[id]);
                 }
             }
 
+
             if(entries.length > 0) {
                 var myObj = _.reduce(entries, function(obj, entry) {
-                    obj.total_minutes += entry.time_in_minutes;
-                    obj.total_cost_cents += entry.total_cost_cents;
+                    obj.total_minutes += entry['time_in_minutes'];
+                    obj.total_cost_cents += entry['cost_rate_in_cents'];
                     return obj;
                 }, {
                     total_minutes: 0,
@@ -239,6 +244,10 @@ define(['N/https', './lodash'], function (https, _) {
                 output.total_cost_rate = +(myObj.total_cost_cents/100).toFixed(2);
             }
 
+            log.debug({
+                title: 'getTotalTimeLogged func, output check',
+                details: output
+            })
             return output;
         }
     };
