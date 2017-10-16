@@ -33,11 +33,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="csod_rest_controller.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="csod_rest_controller.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/FileCabinet/SuiteScripts/CSOD_REST/csod_rest_controller.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="266">
-              <caret line="54" column="69" lean-forward="false" selection-start-line="54" selection-start-column="69" selection-end-line="54" selection-end-column="69" />
+            <state relative-caret-position="196">
+              <caret line="81" column="32" lean-forward="true" selection-start-line="81" selection-start-column="32" selection-end-line="81" selection-end-column="32" />
               <folding />
             </state>
           </provider>
@@ -56,18 +56,18 @@
       <file leaf-file-name="CSOD_GET_Exchange_Rate_Service.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/FileCabinet/SuiteScripts/CSOD_REST/Http_Service_Libraries/CSOD_GET_Exchange_Rate_Service.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="266">
+            <state relative-caret-position="2967">
               <caret line="129" column="52" lean-forward="false" selection-start-line="129" selection-start-column="43" selection-end-line="129" selection-end-column="52" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CSOD_POST_Services.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="CSOD_POST_Services.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/FileCabinet/SuiteScripts/CSOD_REST/Http_Service_Libraries/CSOD_POST_Services.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="222">
-              <caret line="64" column="16" lean-forward="false" selection-start-line="64" selection-start-column="16" selection-end-line="64" selection-end-column="16" />
+            <state relative-caret-position="121">
+              <caret line="231" column="43" lean-forward="false" selection-start-line="231" selection-start-column="43" selection-end-line="231" selection-end-column="43" />
               <folding />
             </state>
           </provider>
@@ -95,6 +95,11 @@
       </list>
     </option>
   </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>merge</find>
+    </findStrings>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -105,8 +110,8 @@
         <option value="$PROJECT_DIR$/FileCabinet/SuiteScripts/CSOD_REST/Http_Service_Libraries/CSOD_GET_Services.js" />
         <option value="$PROJECT_DIR$/FileCabinet/SuiteScripts/CSOD_REST/Http_Service_Libraries/CSOD_GET_Exchange_Rate_Service.js" />
         <option value="$PROJECT_DIR$/.sdf" />
-        <option value="$PROJECT_DIR$/FileCabinet/SuiteScripts/CSOD_REST/Http_Service_Libraries/CSOD_POST_Services.js" />
         <option value="$PROJECT_DIR$/FileCabinet/SuiteScripts/CSOD_REST/csod_rest_controller.js" />
+        <option value="$PROJECT_DIR$/FileCabinet/SuiteScripts/CSOD_REST/Http_Service_Libraries/CSOD_POST_Services.js" />
       </list>
     </option>
   </component>
@@ -124,10 +129,9 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-240" />
-    <option name="y" value="-1057" />
+    <option name="y" value="23" />
     <option name="width" value="1343" />
-    <option name="height" value="1057" />
+    <option name="height" value="827" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -248,23 +252,24 @@
       <workItem from="1507735395875" duration="1283000" />
       <workItem from="1507823135261" duration="5822000" />
       <workItem from="1507913869915" duration="7277000" />
+      <workItem from="1508175334512" duration="6597000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="51759000" />
+    <option name="totallyTimeSpent" value="58356000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-240" y="-1057" width="1343" height="1057" extended-state="0" />
+    <frame x="0" y="23" width="1343" height="827" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26701966" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25037822" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.23361522" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.23324022" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -655,10 +660,26 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/FileCabinet/SuiteScripts/CSOD_REST/Http_Service_Libraries/CSOD_GET_Exchange_Rate_Service.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2967">
+          <caret line="129" column="52" lean-forward="false" selection-start-line="129" selection-start-column="43" selection-end-line="129" selection-end-column="52" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/FileCabinet/SuiteScripts/CSOD_REST/Http_Service_Libraries/CSOD_GET_Services.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="253">
           <caret line="11" column="32" lean-forward="false" selection-start-line="11" selection-start-column="32" selection-end-line="11" selection-end-column="32" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/FileCabinet/SuiteScripts/CSOD_REST/csod_rest_controller.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="196">
+          <caret line="81" column="32" lean-forward="true" selection-start-line="81" selection-start-column="32" selection-end-line="81" selection-end-column="32" />
           <folding />
         </state>
       </provider>
@@ -673,24 +694,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/FileCabinet/SuiteScripts/CSOD_REST/Http_Service_Libraries/CSOD_POST_Services.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="222">
-          <caret line="64" column="16" lean-forward="false" selection-start-line="64" selection-start-column="16" selection-end-line="64" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/FileCabinet/SuiteScripts/CSOD_REST/Http_Service_Libraries/CSOD_GET_Exchange_Rate_Service.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="266">
-          <caret line="129" column="52" lean-forward="false" selection-start-line="129" selection-start-column="43" selection-end-line="129" selection-end-column="52" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/FileCabinet/SuiteScripts/CSOD_REST/csod_rest_controller.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="266">
-          <caret line="54" column="69" lean-forward="false" selection-start-line="54" selection-start-column="69" selection-end-line="54" selection-end-column="69" />
+        <state relative-caret-position="121">
+          <caret line="231" column="43" lean-forward="false" selection-start-line="231" selection-start-column="43" selection-end-line="231" selection-end-column="43" />
           <folding />
         </state>
       </provider>

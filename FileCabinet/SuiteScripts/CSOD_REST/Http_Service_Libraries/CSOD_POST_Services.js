@@ -48,14 +48,33 @@ define(['N/https', './lodash'], function (https, _) {
 
         // the call is to parse workspaces
         if(workspaces !== undefined) {
+
+            var creator = data.users;
+            var projectGroup = data.workspace_groups;
+
             for(var prop in workspaces) {
-            	
-            	
+
+                log.debug({
+                   title: "Check Workspace ID",
+                   details: "ID: " + prop
+                });
+
                 var tempObj = {};
+                tempObj["creator_name"] = "";
+                tempObj["group_name"] = "";
+
                 var workspace = workspaces[prop];
 
                 for(var workspaceProp in workspace) {
                     tempObj[workspaceProp] = workspace[workspaceProp];
+                    if(workspaceProp == 'creator_id' &&
+                        creator['creator_id'] !== undefined) {
+                        tempObj["creator_name"] = creator[workspace[workspaceProp]]["full_name"];
+                    }
+                    if(workspaceProp == 'workspace_group_ids' &&
+                        projectGroup['workspace_group_ids'] !== undefined) {
+                        tempObj["group_name"] = projectGroup[workspace[workspaceProp][0]]["name"];
+                    }
                 }
 
                 tempObj = attachCustomFields(tempObj, customFieldObj, 'Workspace');
@@ -71,7 +90,7 @@ define(['N/https', './lodash'], function (https, _) {
                 	title: 'storyObj',
                 	details: storyObj
                 });
-
+                tempObj = _.assign(tempObj, storyObj);
                 output.push(tempObj);
             }
         }
@@ -106,10 +125,16 @@ define(['N/https', './lodash'], function (https, _) {
     		
     		// check if count is bigger than 200
     		var dataSize = Math.ceil(count / 200);
-    		if((dataSize) > 1) {
+
+            log.debug({
+                title: "dataSize in getDataFromStory",
+                details: dataSize
+            });
+
+    		if(dataSize > 1) {
     			
-    			for(var i = 2; i <= dataSize; i++) {
-    				page = i;
+    			for(page = 2; page <= dataSize; page++) {
+
     				url = "https://api.mavenlink.com/api/v1/stories.json?all_on_account=true&workspace_id=" + 
     	    		workspaceId + "&page=" + page + "&per_page=200";
     				response = callMavenLink(url);
@@ -132,7 +157,12 @@ define(['N/https', './lodash'], function (https, _) {
             for(var x = 0; x < data.length; x++) {
             	
             	var stories = data[x].stories;
-            	
+
+            	log.debug({
+                    title: "check stories obj in line 162",
+                    details: stories
+                });
+
             	for(id in stories) {
                     var story = stories[id];
                     storiesArr.push(story);
@@ -173,6 +203,10 @@ define(['N/https', './lodash'], function (https, _) {
 
     	}
 
+    	log.debug({
+            title: "check tempObj in getDataFromStory",
+            details: tempObj
+        })
     	return tempObj;
 
     };
@@ -192,6 +226,17 @@ define(['N/https', './lodash'], function (https, _) {
         if(response.code === 200 || response.code === "200") {
             var data = [JSON.parse(response.body)];
             var count = data[0].count;
+
+
+            // Stop and return
+            // Data is too large to process
+            if(count > 2000) {
+                return {
+                    total_hours: 0,
+                    total_cost_rate: 0
+                }
+            }
+
             var dataSize = +Math.ceil(count/200);
 
             if(dataSize > 1) {
@@ -256,14 +301,14 @@ define(['N/https', './lodash'], function (https, _) {
         var url = "https://api.mavenlink.com/api/v1/custom_field_values.json?subject_type=" + rec
             + "&with_subject_id=" + obj.id;
 
-        var newObj = _.assign(obj, custObj)
+        var newObj = _.assign(obj, custObj);
 
         var response = callMavenLink(url);
 
-        // log.debug({
-        //     title: "Response code",
-        //     details: response.code
-        // });
+        log.debug({
+            title: "Response code in attachCustomFields",
+            details: response.code
+        });
 
         if(response.code == 200 || response.code == '200') {
             var body = JSON.parse(response.body);
@@ -285,7 +330,7 @@ define(['N/https', './lodash'], function (https, _) {
                 newObj[customField['custom_field_name']] = customField['display_value'];
 
             }
-            
+
             return newObj;
         }
 
