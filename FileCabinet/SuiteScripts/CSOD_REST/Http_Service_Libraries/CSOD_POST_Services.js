@@ -68,11 +68,11 @@ define(['N/https', './lodash'], function (https, _) {
                 for(var workspaceProp in workspace) {
                     tempObj[workspaceProp] = workspace[workspaceProp];
                     if(workspaceProp == 'creator_id' &&
-                        creator['creator_id'] !== undefined) {
+                        workspace['creator_id'] !== undefined) {
                         tempObj["creator_name"] = creator[workspace[workspaceProp]]["full_name"];
                     }
                     if(workspaceProp == 'workspace_group_ids' &&
-                        projectGroup['workspace_group_ids'] !== undefined) {
+                        workspace['workspace_group_ids'].length > 0) {
                         tempObj["group_name"] = projectGroup[workspace[workspaceProp][0]]["name"];
                     }
                 }
