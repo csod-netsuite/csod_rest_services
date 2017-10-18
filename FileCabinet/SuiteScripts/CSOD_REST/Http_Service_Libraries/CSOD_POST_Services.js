@@ -13,6 +13,8 @@ define(['N/https', './lodash'], function (https, _) {
      */
     var exports = {};
     
+    const logEnable = false;
+    
     var MAVENLINK_AUTH = 'bearer 6db0e0bc77ecaa427697d0845692395d822f56d057fe22ea30ec184f79b7887c';
 
     // parses and restructures JSON
@@ -26,12 +28,14 @@ define(['N/https', './lodash'], function (https, _) {
         var workspaces = data.workspaces;
         
         var customFieldObj = getAllCustomFields(WORKSPACE_CF_SETS);
-
-        log.debug({
-            title: 'customFieldObj',
-            details: customFieldObj
-        });
-
+        
+        if(logEnable) {
+        	log.debug({
+                title: 'customFieldObj',
+                details: customFieldObj
+            });
+        }
+        
         // the call is to transform stories
         if(stories !== undefined) {
             for(var prop in stories) {
@@ -49,7 +53,7 @@ define(['N/https', './lodash'], function (https, _) {
         // the call is to parse workspaces
         if(workspaces !== undefined) {
 
-            var creator = data.users;
+            var users = data.users;
             var projectGroup = data.workspace_groups;
 
             for(var prop in workspaces) {
@@ -58,25 +62,45 @@ define(['N/https', './lodash'], function (https, _) {
                    title: "Check Workspace ID",
                    details: "ID: " + prop
                 });
-
+                
+                // create object that will be added to output arrays
                 var tempObj = {};
+                tempObj["consultant_lead"] = "";
                 tempObj["creator_name"] = "";
                 tempObj["group_name"] = "";
+                tempObj["group_id"] = "";
+                
 
                 var workspace = workspaces[prop];
 
                 for(var workspaceProp in workspace) {
-                    tempObj[workspaceProp] = workspace[workspaceProp];
+                	
+                	// skip participant_ids
+                	if(workspaceProp != "participant_ids") {
+                		tempObj[workspaceProp] = workspace[workspaceProp];
+                	}
+                	
+                    // adding consultant lead
+                    if(workspaceProp == 'primary_maven_id' &&
+                    		workspace['primary_maven_id']) {
+                    	tempObj["consultant_lead"] = users[workspace[workspaceProp]]["full_name"];
+                    	
+                    }
+                    
+                    // adding creator name
                     if(workspaceProp == 'creator_id' &&
                         workspace['creator_id'] !== undefined) {
-                        tempObj["creator_name"] = creator[workspace[workspaceProp]]["full_name"];
+                        tempObj["creator_name"] = users[workspace[workspaceProp]]["full_name"];
                     }
+                    
+                    // workspace group name and id
                     if(workspaceProp == 'workspace_group_ids' &&
                         workspace['workspace_group_ids'].length > 0) {
                         tempObj["group_name"] = projectGroup[workspace[workspaceProp][0]]["name"];
                         tempObj["group_id"] = projectGroup[workspace[workspaceProp][0]]["id"];
                     }
                 }
+                
 
                 tempObj = attachCustomFields(tempObj, customFieldObj, 'Workspace');
                 
@@ -117,7 +141,8 @@ define(['N/https', './lodash'], function (https, _) {
             completed_tasks_count: 0,
             milestone_weight_complete_percent: 0,
             total_time_logged: 0,
-            total_cost: 0
+            total_cost: 0,
+            approved_hours: 0
         };
     	
     	if(response.code == 200 || response.code == '200') {
@@ -160,7 +185,7 @@ define(['N/https', './lodash'], function (https, _) {
             	var stories = data[x].stories;
 
             	log.debug({
-                    title: "check stories obj in line 162",
+                    title: "check stories obj in line 164",
                     details: stories
                 });
 
@@ -201,13 +226,15 @@ define(['N/https', './lodash'], function (https, _) {
 
             tempObj.total_time_logged = timeEntryOutput.total_hours;
             tempObj.total_cost = timeEntryOutput.total_cost_rate;
+            tempObj.approved_hours = timeEntryOutput.apporved_hours;
 
     	}
 
     	log.debug({
             title: "check tempObj in getDataFromStory",
             details: tempObj
-        })
+        });
+    	
     	return tempObj;
 
     };
@@ -228,14 +255,16 @@ define(['N/https', './lodash'], function (https, _) {
             var data = [JSON.parse(response.body)];
             var count = data[0].count;
 
-
+            var output = {
+                    total_hours: 0,
+                    total_cost_rate: 0,
+                    apporved_hours: 0
+                };
+            
             // Stop and return
             // Data is too large to process
-            if(count > 2000) {
-                return {
-                    total_hours: 0,
-                    total_cost_rate: 0
-                }
+            if(count > 10000) {
+            	return output;
             }
 
             var dataSize = +Math.ceil(count/200);
@@ -260,10 +289,7 @@ define(['N/https', './lodash'], function (https, _) {
             }
 
             var entries = [];
-            var output = {
-                total_hours: 0,
-                total_cost_rate: 0
-            };
+       
 
             // push all entries to entries array
             for(var i = 0; i < data.length; i++) {
@@ -280,15 +306,21 @@ define(['N/https', './lodash'], function (https, _) {
                 var myObj = _.reduce(entries, function(obj, entry) {
                     obj.total_minutes += entry['time_in_minutes'];
                     obj.total_cost_cents += entry['cost_rate_in_cents'];
+                    if(entry['approved'] == true) {
+                    	obj.approved_hours += entry['time_in_minutes'];
+                    }
                     return obj;
                 }, {
                     total_minutes: 0,
-                    total_cost_cents: 0
+                    total_cost_cents: 0,
+                    approved_hours: 0
                 });
 
                 output.total_hours = +(myObj.total_minutes/60).toFixed(2);
+                output.apporved_hours = +(myObj.approved_hours/60).toFixed(2);
                 output.total_cost_rate = +(myObj.total_cost_cents/100).toFixed(2);
             }
+            
 
             log.debug({
                 title: 'getTotalTimeLogged func, output check',
