@@ -71,3 +71,10 @@ java.lang.Exception: You have entered an invalid email address or password. Plea
 2017-09-07 13:20:59,182 - Details: com.netledger.common.exceptions.NLUserError: SuiteScript 2.0 entry point scripts must implement one script type function.
 2017-09-07 13:20:59,182 - File: ~/FileCabinet/SuiteScripts/CSOD_REST/Http_Service_Libraries/CSOD_GET_Services.js
 2017-09-07 13:20:59,182 - 2017-09-07 13:20:59 (PST) Installation FAILED (0 minutes 2 seconds)
+2017-10-17 08:42:58,685 - *** ERROR ***
+2017-10-17 08:42:58,685 - 
+2017-10-17 08:42:58,685 - Validation failed.
+2017-10-17 08:42:58,685 - 
+2017-10-17 08:42:58,686 - An error occurred during manifest validation.
+2017-10-17 08:42:58,686 - Details: The manifest file is missing.
+2017-10-17 08:42:58,686 - File: manifest.xml

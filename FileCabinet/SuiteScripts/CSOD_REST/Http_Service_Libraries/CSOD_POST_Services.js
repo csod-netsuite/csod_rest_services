@@ -74,6 +74,7 @@ define(['N/https', './lodash'], function (https, _) {
                     if(workspaceProp == 'workspace_group_ids' &&
                         workspace['workspace_group_ids'].length > 0) {
                         tempObj["group_name"] = projectGroup[workspace[workspaceProp][0]]["name"];
+                        tempObj["group_id"] = projectGroup[workspace[workspaceProp][0]]["id"];
                     }
                 }
 
