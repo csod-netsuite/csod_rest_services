@@ -1,4 +1,5 @@
-define(['N/https', './lodash'], function (https, _) {
+define(['N/https', './lodash', 'N/runtime', './moment'],
+    function (https, _, runtime, moment) {
 
     /**
      * Module Description...
@@ -16,6 +17,9 @@ define(['N/https', './lodash'], function (https, _) {
     const logEnable = false;
     
     var MAVENLINK_AUTH = 'bearer 6db0e0bc77ecaa427697d0845692395d822f56d057fe22ea30ec184f79b7887c';
+    var dateString = runtime.getCurrentScript().getParameter({name: 'custscript_csod_ml_lastest_updated_at'});
+    var processUnixTime = moment(dateString).valueOf();
+    var newLatestISOTime = 0;
 
     // parses and restructures JSON
     var mavenlinkDataProcess = function(data) {
@@ -73,52 +77,72 @@ define(['N/https', './lodash'], function (https, _) {
 
                 var workspace = workspaces[prop];
 
-                for(var workspaceProp in workspace) {
-                	
-                	// skip participant_ids
-                	if(workspaceProp != "participant_ids") {
-                		tempObj[workspaceProp] = workspace[workspaceProp];
-                	}
-                	
-                    // adding consultant lead
-                    if(workspaceProp == 'primary_maven_id' &&
-                    		workspace['primary_maven_id']) {
-                    	tempObj["consultant_lead"] = users[workspace[workspaceProp]]["full_name"];
-                    	
+                // check updated_at value and compare
+                var currUpdatedAtStr = workspace['updated_at'];
+                var currUpdatedAtUnix = moment(currUpdatedAtStr).valueOf();
+
+                // add to output only date is equal or greater
+                if(currUpdatedAtUnix >= processUnixTime) {
+                    if(currUpdatedAtUnix > moment(newLatestISOTime).valueOf()) {
+                        newLatestISOTime = moment(currUpdatedAtUnix).format();
                     }
-                    
-                    // adding creator name
-                    if(workspaceProp == 'creator_id' &&
-                        workspace['creator_id'] !== undefined) {
-                        tempObj["creator_name"] = users[workspace[workspaceProp]]["full_name"];
+                    for(var workspaceProp in workspace) {
+
+                        // skip participant_ids
+                        if(workspaceProp != "participant_ids") {
+                            tempObj[workspaceProp] = workspace[workspaceProp];
+                        }
+
+                        // adding consultant lead
+                        if(workspaceProp == 'primary_maven_id' &&
+                            workspace['primary_maven_id']) {
+                            tempObj["consultant_lead"] = users[workspace[workspaceProp]]["full_name"];
+
+                        }
+
+                        // adding creator name
+                        if(workspaceProp == 'creator_id' &&
+                            workspace['creator_id'] !== undefined) {
+                            tempObj["creator_name"] = users[workspace[workspaceProp]]["full_name"];
+                        }
+
+                        // workspace group name and id
+                        if(workspaceProp == 'workspace_group_ids' &&
+                            workspace['workspace_group_ids'].length > 0) {
+                            tempObj["group_name"] = projectGroup[workspace[workspaceProp][0]]["name"];
+                            tempObj["group_id"] = projectGroup[workspace[workspaceProp][0]]["id"];
+                        }
                     }
-                    
-                    // workspace group name and id
-                    if(workspaceProp == 'workspace_group_ids' &&
-                        workspace['workspace_group_ids'].length > 0) {
-                        tempObj["group_name"] = projectGroup[workspace[workspaceProp][0]]["name"];
-                        tempObj["group_id"] = projectGroup[workspace[workspaceProp][0]]["id"];
-                    }
+
+
+                    tempObj = attachCustomFields(tempObj, customFieldObj, 'Workspace');
+
+                    var storyObj = getDataFromStory(prop);
+
+                    log.debug({
+                        title: 'tempObj',
+                        details: tempObj
+                    });
+
+                    log.debug({
+                        title: 'storyObj',
+                        details: storyObj
+                    });
+                    // append data from stories/tasks
+                    tempObj = _.assign(tempObj, storyObj);
+                    // append latest date
+                    tempObj['New_Latest_Updated_at'] = newLatestISOTime;
+                    output.push(tempObj);
+
                 }
-                
 
-                tempObj = attachCustomFields(tempObj, customFieldObj, 'Workspace');
-                
-                var storyObj = getDataFromStory(prop);
-
-                log.debug({
-                    title: 'tempObj',
-                    details: tempObj
-                });
-
-                log.debug({
-                	title: 'storyObj',
-                	details: storyObj
-                });
-                tempObj = _.assign(tempObj, storyObj);
-                output.push(tempObj);
             }
         }
+
+        log.audit({
+            title: 'Output Length Check',
+            details: 'OUTPUT = ' + output.length
+        });
 
         return output;
     };
@@ -185,7 +209,7 @@ define(['N/https', './lodash'], function (https, _) {
             	var stories = data[x].stories;
 
             	log.debug({
-                    title: "check stories obj in line 164",
+                    title: "check stories obj in line 212",
                     details: stories
                 });
 
@@ -213,13 +237,17 @@ define(['N/https', './lodash'], function (https, _) {
                return story['story_type'] == 'milestone';
             });
 
-            if(completedMilestones.length > 0 && milestoneCount > 0) {
-                var myLove = +(completedMilestones.length/milestoneCount).toFixed(2);
-            }
+            var totalWeight = completedMilestones.reduce(function(sum, obj) {
+                return sum + (obj["weight"] || 0);
+            }, 0);
 
+            log.audit({
+                title: "Total Weight Check",
+                details: totalWeight
+            });
 
             tempObj.completed_tasks_count = completedTasks.length;
-            tempObj.milestone_weight_complete_percent = myLove;
+            tempObj.milestone_weight_complete_percent = totalWeight;
 
             // get Total Time Logged by calling another URL
             var timeEntryOutput = getTotalTimeLogged(workspaceId);
