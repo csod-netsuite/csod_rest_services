@@ -40,7 +40,7 @@ define(['N/https', './lodash', 'N/runtime', './moment'],
             });
         }
         
-        // the call is to transform stories
+        // call to transform stories
         if(stories !== undefined) {
             for(var prop in stories) {
                 var tempObj = {};
@@ -54,7 +54,7 @@ define(['N/https', './lodash', 'N/runtime', './moment'],
             }
         }
 
-        // the call is to parse workspaces
+        // call to parse/transform workspaces
         if(workspaces !== undefined) {
 
             var users = data.users;
@@ -83,7 +83,16 @@ define(['N/https', './lodash', 'N/runtime', './moment'],
 
                 // add to output only date is equal or greater
                 if(currUpdatedAtUnix >= processUnixTime) {
+                	
+                	if(!logEnable) {
+                		log.audit({
+                			title: "Time Value Check",
+                			details: "Object Unix Time: " + currUpdatedAtUnix + ", processUnixTime: " + processUnixTime
+                		});
+                	}
+                	
                     if(currUpdatedAtUnix > moment(newLatestISOTime).valueOf()) {
+                    	// write latest upated_at
                         newLatestISOTime = moment(currUpdatedAtUnix).format();
                     }
                     for(var workspaceProp in workspace) {
@@ -240,11 +249,14 @@ define(['N/https', './lodash', 'N/runtime', './moment'],
             var totalWeight = completedMilestones.reduce(function(sum, obj) {
                 return sum + (obj["weight"] || 0);
             }, 0);
-
-            log.audit({
-                title: "Total Weight Check",
-                details: totalWeight
-            });
+            
+            if(logEnable) {
+            	log.audit({
+                    title: "Total Weight Check",
+                    details: totalWeight
+                });
+            }
+            
 
             tempObj.completed_tasks_count = completedTasks.length;
             tempObj.milestone_weight_complete_percent = totalWeight;

@@ -21,7 +21,8 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
         MAVENLINK : '1',
         CHECK_CUSTOMER_ID: '2',
         EXCHANGE_RATE: '3',
-        POST_CSV: '4'
+        POST_CSV: '4',
+        UPDATE_PPDATE: '5'
     };
 
     function _get(context) {
@@ -62,6 +63,14 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
                 output = CSOD_EX_RATE.getExchangeRate(currencySymbol, effectiveDateStart, effectiveDateEnd);
             }
 
+        } else if(context.action == ACTIONS.UPDATE_PPDATE) {
+        	log.debug({
+                title: "RESTlet Action 5 Called",
+                details: context.internalId
+            });
+        	
+        	const deployId = '8331';
+        	output = CSOD_GET.setNewPPDate(context.ppdate, deployId);
         }
 
         // route to different method

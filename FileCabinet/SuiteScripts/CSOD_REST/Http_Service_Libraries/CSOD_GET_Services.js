@@ -1,4 +1,4 @@
-define(['N/search'], function (search) {
+define(['N/search', 'N/record'], function (search, record) {
 
     /**
      * Module Description...
@@ -44,8 +44,41 @@ define(['N/search'], function (search) {
 
         return output;
     };
+    
+    var setNewPPDate = function(ppDate, deployId) {
+    	
+    	if(ppDate === undefined || ppDate === null || ppDate === '') {
+    		return {
+    			success: false,
+    			message: "Missing PPDATE"
+    		};
+    	} 
+    	
+    	var recordId = record.submitFields({
+    		type: record.Type.SCRIPT_DEPLOYMENT,
+    		id: deployId,
+    		values: {
+    			custscript_csod_ml_lastest_updated_at: ppDate
+    		}
+    	});
+    	
+    	log.debug({
+    		title: "PPDATE Updated",
+    		details: recordId
+    	});
+    	
+    	if(recordId) {
+    		return {
+    			success: true,
+    			message: 'PPDATE Updated'
+    		}
+    	}
+    	
+    	
+    }
 
     exports.getSalesForceID = getSalesForceID;
+    exports.setNewPPDate = setNewPPDate;
 
     return exports;
 });
