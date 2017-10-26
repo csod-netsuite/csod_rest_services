@@ -1,5 +1,5 @@
-define(['N/https', './lodash', 'N/runtime', './moment'],
-    function (https, _, runtime, moment) {
+define(['N/https', './lodash', 'N/runtime', './moment', 'N/email'],
+    function (https, _, runtime, moment, email) {
 
     /**
      * Module Description...
@@ -15,8 +15,9 @@ define(['N/https', './lodash', 'N/runtime', './moment'],
     var exports = {};
     
     const logEnable = false;
+    const countThreshold = 8000;
     
-    var MAVENLINK_AUTH = 'bearer 6db0e0bc77ecaa427697d0845692395d822f56d057fe22ea30ec184f79b7887c';
+    const MAVENLINK_AUTH = 'bearer 6db0e0bc77ecaa427697d0845692395d822f56d057fe22ea30ec184f79b7887c';
     var dateString = runtime.getCurrentScript().getParameter({name: 'custscript_csod_ml_lastest_updated_at'});
     var processUnixTime = moment(dateString).valueOf();
     var newLatestISOTime = 0;
@@ -303,7 +304,17 @@ define(['N/https', './lodash', 'N/runtime', './moment'],
             
             // Stop and return
             // Data is too large to process
-            if(count > 10000) {
+            // Send Email Notification
+            if(count > countThreshold) {
+                var emailBody = "Workspace ID : " + workspaceId +
+                    " has more than " + countThreshold + " time entries. <br/>" +
+                    "It is skipped for the process to calculate total hours and costs.";
+                email.send({
+                    author: 117473,
+                    recipients: ['cyi@csod.com','wshawhughes@csod.com'],
+                    subject: "Workspace with Large Time Entries",
+                    body: emailBody
+                });
             	return output;
             }
 
