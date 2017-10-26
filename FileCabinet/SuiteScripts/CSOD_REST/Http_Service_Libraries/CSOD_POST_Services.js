@@ -383,7 +383,7 @@ define(['N/https', './lodash', 'N/runtime', './moment', 'N/email'],
 
     var attachCustomFields = function(obj, custObj, rec) {
         var url = "https://api.mavenlink.com/api/v1/custom_field_values.json?subject_type=" + rec
-            + "&with_subject_id=" + obj.id;
+            + "&with_subject_id=" + obj.id + "&per_page=200";
 
         var newObj = _.assign(obj, custObj);
 
@@ -437,7 +437,12 @@ define(['N/https', './lodash', 'N/runtime', './moment', 'N/email'],
 
         return response;
     };
-    
+
+        /**
+         *
+         * @param validSets
+         * @returns {{}}
+         */
     var getAllCustomFields = function(validSets) {
     	
     	var customFieldsKeys = [];
