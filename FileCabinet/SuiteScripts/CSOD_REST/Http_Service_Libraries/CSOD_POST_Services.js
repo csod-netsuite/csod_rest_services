@@ -63,11 +63,13 @@ define(['N/https', './lodash', 'N/runtime', './moment', 'N/email'],
 
             for(var prop in workspaces) {
 
-                log.debug({
-                   title: "Check Workspace ID",
-                   details: "ID: " + prop
-                });
-                
+                if(logEnable){
+                    log.debug({
+                        title: "Check Workspace ID",
+                        details: "ID: " + prop
+                    });
+                }
+
                 // create object that will be added to output arrays
                 var tempObj = {};
                 tempObj["consultant_lead"] = "";
@@ -82,15 +84,16 @@ define(['N/https', './lodash', 'N/runtime', './moment', 'N/email'],
                 var currUpdatedAtStr = workspace['updated_at'];
                 var currUpdatedAtUnix = moment(currUpdatedAtStr).valueOf();
 
+                if(!logEnable) {
+                    log.audit({
+                        title: "Time Value Check " + prop,
+                        details: "Workspace last modified: " + currUpdatedAtStr +
+                        ", Object Unix Time: " + currUpdatedAtUnix + ", processUnixTime: " + processUnixTime
+                    });
+                }
+
                 // add to output only date is equal or greater
                 if(currUpdatedAtUnix >= processUnixTime) {
-                	
-                	if(!logEnable) {
-                		log.audit({
-                			title: "Time Value Check",
-                			details: "Object Unix Time: " + currUpdatedAtUnix + ", processUnixTime: " + processUnixTime
-                		});
-                	}
                 	
                     if(currUpdatedAtUnix > moment(newLatestISOTime).valueOf()) {
                     	// write latest updated_at
@@ -129,15 +132,18 @@ define(['N/https', './lodash', 'N/runtime', './moment', 'N/email'],
 
                     var storyObj = getDataFromStory(prop);
 
-                    log.debug({
-                        title: 'tempObj',
-                        details: tempObj
-                    });
+                    if(logEnable) {
+                        log.debug({
+                            title: 'tempObj',
+                            details: tempObj
+                        });
 
-                    log.debug({
-                        title: 'storyObj',
-                        details: storyObj
-                    });
+                        log.debug({
+                            title: 'storyObj',
+                            details: storyObj
+                        });
+                    }
+
                     // append data from stories/tasks
                     tempObj = _.assign(tempObj, storyObj);
                     // append latest date
@@ -186,10 +192,12 @@ define(['N/https', './lodash', 'N/runtime', './moment', 'N/email'],
     		// check if count is bigger than 200
     		var dataSize = Math.ceil(count / 200);
 
-            log.debug({
-                title: "dataSize in getDataFromStory",
-                details: dataSize
-            });
+    		if(!logEnable) {
+                log.debug({
+                    title: "dataSize in getDataFromStory",
+                    details: dataSize
+                });
+            }
 
     		if(dataSize > 1) {
     			
@@ -218,10 +226,12 @@ define(['N/https', './lodash', 'N/runtime', './moment', 'N/email'],
             	
             	var stories = data[x].stories;
 
-            	log.debug({
-                    title: "check stories obj in line 212",
-                    details: stories
-                });
+            	if(logEnable) {
+                    log.debug({
+                        title: "check stories obj in line 212",
+                        details: stories
+                    });
+                }
 
             	for(id in stories) {
                     var story = stories[id];
@@ -271,11 +281,12 @@ define(['N/https', './lodash', 'N/runtime', './moment', 'N/email'],
 
     	}
 
-    	log.debug({
-            title: "check tempObj in getDataFromStory",
-            details: tempObj
-        });
-    	
+    	if(logEnable) {
+            log.debug({
+                title: "check tempObj in getDataFromStory",
+                details: tempObj
+            });
+        }
     	return tempObj;
 
     };
@@ -372,11 +383,13 @@ define(['N/https', './lodash', 'N/runtime', './moment', 'N/email'],
                 output.total_cost_rate = +(myObj.total_cost_cents/100).toFixed(2);
             }
             
+            if(logEnable) {
+                log.debug({
+                    title: 'getTotalTimeLogged func, output check',
+                    details: output
+                });
+            }
 
-            log.debug({
-                title: 'getTotalTimeLogged func, output check',
-                details: output
-            })
             return output;
         }
     };
@@ -388,11 +401,12 @@ define(['N/https', './lodash', 'N/runtime', './moment', 'N/email'],
         var newObj = _.assign(obj, custObj);
 
         var response = callMavenLink(url);
-
-        log.debug({
-            title: "Response code in attachCustomFields",
-            details: response.code
-        });
+        if(logEnable) {
+            log.debug({
+                title: "Response code in attachCustomFields",
+                details: response.code
+            });
+        }
 
         if(response.code == 200 || response.code == '200') {
             var body = JSON.parse(response.body);
@@ -472,11 +486,12 @@ define(['N/https', './lodash', 'N/runtime', './moment', 'N/email'],
     			output[customFieldsKeys[i]] = "";
     		}
     	}
-    	
-    	log.debug({
-    		title: "New Custom Fields Object",
-    		details: output
-    	});
+    	if(logEnable) {
+            log.debug({
+                title: "New Custom Fields Object",
+                details: output
+            });
+        }
 
     	return output;
 

@@ -86,18 +86,18 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
 
         var response = {};
         
-        log.debug({
-            title: 'resquestBody',
-            details: requestBody
-        });
+        // log.debug({
+        //     title: 'resquestBody',
+        //     details: requestBody
+        // });
         //@TODO validate action id
         // Routing to different services
         response = CSOD_POST.mavenlinkDataProcess(requestBody);
 
-        log.debug({
-            title: 'response',
-            details: response
-        });
+        // log.debug({
+        //     title: 'response',
+        //     details: response
+        // });
 
         return response;
     }
