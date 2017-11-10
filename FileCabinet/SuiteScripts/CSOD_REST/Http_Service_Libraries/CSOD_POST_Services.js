@@ -93,7 +93,7 @@ define(['N/https', './lodash', 'N/runtime', './moment', 'N/email'],
                 	}
                 	
                     if(currUpdatedAtUnix > moment(newLatestISOTime).valueOf()) {
-                    	// write latest upated_at
+                    	// write latest updated_at
                         newLatestISOTime = moment(currUpdatedAtUnix).format();
                     }
                     for(var workspaceProp in workspace) {

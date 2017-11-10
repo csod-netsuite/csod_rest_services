@@ -1,6 +1,5 @@
-define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Service_Libraries/CSOD_GET_Services'
-        ,'./Http_Service_Libraries/CSOD_GET_Exchange_Rate_Service', './Http_Service_Libraries/lodash', 'N/file'],
-    function (error, CSOD_POST, CSOD_GET, CSOD_EX_RATE, _, file) {
+define(['N/https'],
+    function (https) {
 
         /**
          * Module Description...
@@ -28,6 +27,9 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
                 });
             }
             var output = processData(requestBody);
+
+            return output;
+
         };
 
         var processData = function(body) {
@@ -35,9 +37,6 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
             var clients = body.workspace_groups;
             var participants = body.users;
 
-            var projectArr = [];
-            var clientArr = [];
-            var users = [];
             var responseArr = [];
             if(projects) {
                 for (id in projects) {
@@ -53,7 +52,7 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
                     };
                     // get project id
                     tempObj.projectId = id;
-                    project = projects[id];
+                    var project = projects[id];
 
                     var statusObj = project["status"];
                     var status = statusObj["message"];
@@ -61,11 +60,14 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
                     // get status
                     tempObj.status = status;
 
-                    // get clinent
+                    // get client
                     var clientArr = project["workspace_group_ids"];
+
+
                     if(clientArr.length > 0) {
                         var clientId = clientArr[0];
                         var workspace_group = clients[clientId];
+
                         if(workspace_group !== undefined) {
                             tempObj.client = workspace_group["name"];
 
@@ -74,11 +76,38 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
                                 "subject_type=Workspace_group&"+
                                 "with_subject_id="+ clientId +"&per_page=200";
 
-                            var getCustomFieldValues = callMavenLink(customFieldsURL);
+                            var response = callMavenLink(customFieldsURL);
+                            if(logEnable){
+                                log.debug({
+                                    title: "Response from Mavenlink",
+                                    details: response
+                                })
+                            };
 
+                            if(response.code === 200 || response.code === "200") {
+                                var salesforceIDObj = extractSFIDs(JSON.parse(response.body));
+
+                                if(salesforceIDObj.salesforceId !== undefined ||
+                                    salesforceIDObj.salesforceId !== '') {
+
+                                    tempObj.salesforceId = salesforceIDObj.salesforceId;
+                                    tempObj.salesforceId18 = salesforceIDObj.salesforceId18;
+
+                                    log.debug({
+                                        title: "salesforceID Obj",
+                                        details: salesforceIDObj
+                                    });
+                                }
+
+                            } else {
+                                log.error({
+                                    title: "Mavenlink Response for Getting Custom Field Values",
+                                    details: "Response Code: " + response.code
+                                })
+                            }
                         }
 
-                    }
+                    }  // END Getting Client and SalesForce ID
 
                     // get users
                     var users = project["participant_ids"];
@@ -92,20 +121,54 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
                                 };
                                 participantObj.fullName = participant["full_name"];
                                 participantObj.email = participant["email_address"];
-                                participants.push(participantObj);
+                                tempObj.users.push(participantObj);
                             }
                         }
                     }
-
-
-
 
                     // Append for output
                     responseArr.push(tempObj);
                 }
             }
+            return responseArr;
+        };
 
+        var extractSFIDs = function(body) {
+            var custonFieldValues = body.custom_field_values;
+            var outputObj = {
+                salesforceId: "",
+                salesforceId18: ""
+            };
 
+            if(logEnable) {
+                log.debug({
+                    title: "Custom Field Values",
+                    details: custonFieldValues
+                });
+            };
+
+            for (id in custonFieldValues) {
+                var customFieldValue = custonFieldValues[id];
+                var customFieldId = parseInt(customFieldValue["custom_field_id"]);
+                if(customFieldIds.indexOf(customFieldId) > -1) {
+                    if(customFieldId == 23665) {
+                        outputObj.salesforceId = customFieldValue["value"];
+
+                    } else if(customFieldId == 23675) {
+                        outputObj.salesforceId18 = customFieldValue["value"];
+
+                    }
+                }
+            };
+
+            if(logEnable) {
+                log.debug({
+                   title: "SalesForce ID Object",
+                   details: outputObj
+                });
+            }
+
+            return outputObj;
         };
 
         var callMavenLink = function(url) {
