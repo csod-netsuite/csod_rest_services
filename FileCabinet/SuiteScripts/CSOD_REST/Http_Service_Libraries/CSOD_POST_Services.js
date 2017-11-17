@@ -15,6 +15,7 @@ define(['N/https', './lodash', 'N/runtime', './moment', 'N/email'],
     var exports = {};
     
     const logEnable = false;
+    // Count limit for Time Entries
     const countThreshold = 8000;
     
     const MAVENLINK_AUTH = 'bearer 6db0e0bc77ecaa427697d0845692395d822f56d057fe22ea30ec184f79b7887c';
