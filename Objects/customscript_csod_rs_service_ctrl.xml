@@ -11,12 +11,42 @@
   <postfunction>post</postfunction>
   <putfunction></putfunction>
   <scriptfile>[/SuiteScripts/CSOD_REST/csod_rest_controller.js]</scriptfile>
+  <scriptcustomfields>
+    <scriptcustomfield scriptid="custscript_csod_ml_lastest_updated_at">
+      <accesslevel>2</accesslevel>
+      <applyformatting>F</applyformatting>
+      <checkspelling>F</checkspelling>
+      <defaultchecked>F</defaultchecked>
+      <defaultselection></defaultselection>
+      <defaultvalue></defaultvalue>
+      <description></description>
+      <displayheight></displayheight>
+      <displaytype>NORMAL</displaytype>
+      <displaywidth></displaywidth>
+      <dynamicdefault></dynamicdefault>
+      <fieldtype>TEXT</fieldtype>
+      <help></help>
+      <isformula>F</isformula>
+      <ismandatory>F</ismandatory>
+      <label>Latest Last Updated At</label>
+      <linktext></linktext>
+      <maxlength></maxlength>
+      <maxvalue></maxvalue>
+      <minvalue></minvalue>
+      <onparentdelete></onparentdelete>
+      <searchlevel>2</searchlevel>
+      <selectrecordtype></selectrecordtype>
+      <setting></setting>
+      <storevalue>T</storevalue>
+    </scriptcustomfield>
+  </scriptcustomfields>
   <scriptdeployments>
     <scriptdeployment scriptid="customdeploy1">
       <allemployees>F</allemployees>
       <allpartners>F</allpartners>
       <allroles>T</allroles>
       <audslctrole></audslctrole>
+      <custscript_csod_ml_lastest_updated_at>2017-11-30T10:28:36-08:00</custscript_csod_ml_lastest_updated_at>
       <isdeployed>T</isdeployed>
       <loglevel>DEBUG</loglevel>
       <status>RELEASED</status>
