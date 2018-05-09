@@ -24,7 +24,8 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
         POST_CSV: '4',
         UPDATE_PPDATE: '5',
         UPDATE_SO_LINE: '6',
-        EX_RATE_ANAPLAN: '7'
+        EX_RATE_ANAPLAN: '7',
+        CHECK_EMP_ID: '8'
     };
 
     function _get(context) {
@@ -88,6 +89,17 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
         		details: context.action
         	});
         	output = CSOD_GET.getExchangeRateTable();
+        } else if(context.action == ACTIONS.CHECK_EMP_ID) {
+        	log.debug({
+        		title: "RESTlet Action 8 - CHECK EMP ID Called",
+        		details: context.action
+        	});
+        	if(context.externalid){
+        		output = CSOD_GET.getEmployee(context.externalid);
+        	}
+        	else{
+        		return 'External ID is null';
+        	}
         }
 
         // route to different method
