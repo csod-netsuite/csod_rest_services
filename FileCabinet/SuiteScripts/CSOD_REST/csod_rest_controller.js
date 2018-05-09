@@ -22,7 +22,9 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
         CHECK_CUSTOMER_ID: '2',
         EXCHANGE_RATE: '3',
         POST_CSV: '4',
-        UPDATE_PPDATE: '5'
+        UPDATE_PPDATE: '5',
+        UPDATE_SO_LINE: '6',
+        EX_RATE_ANAPLAN: '7'
     };
 
     function _get(context) {
@@ -71,6 +73,21 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
         	
         	const deployId = '8331';
         	output = CSOD_GET.setNewPPDate(context.ppdate, deployId);
+
+        } else if(context.action == ACTIONS.UPDATE_SO_LINE) {
+            // Get Sales Order lines to update
+            log.debug({
+                title: "RESTlet Action 6 Called",
+                details: context.ppdate
+            });
+            output = CSOD_GET.getUpdatedLinesFromSalesOrder(context.ppdate);
+        } else if(context.action == ACTIONS.EX_RATE_ANAPLAN) {
+        	// Get Exchange Rate CSV for Anaplan
+        	log.debug({
+        		title: "RESTlet Action 7 - EX_RATE_ANAPLAN Called",
+        		details: context.action
+        	});
+        	output = CSOD_GET.getExchangeRateTable();
         }
 
         // route to different method

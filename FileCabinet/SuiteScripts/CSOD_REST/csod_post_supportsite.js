@@ -1,5 +1,5 @@
-define(['N/https'],
-    function (https) {
+define(['N/https'], 
+		function (https) {
 
         /**
          * Module Description...
