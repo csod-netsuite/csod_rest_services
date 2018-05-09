@@ -1,5 +1,5 @@
-define(['N/https', './lodash', 'N/runtime', './moment', 'N/email'],
-    function (https, _, runtime, moment, email) {
+define(['N/https', './lodash', 'N/runtime', './moment', 'N/email'], 
+		function (https, _, runtime, moment, email) {
 
     /**
      * Module Description...

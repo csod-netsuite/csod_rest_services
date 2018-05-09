@@ -1,4 +1,4 @@
-define(['N/search', 'N/record'], function (search, record) {
+define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime) {
 
     /**
      * Module Description...
@@ -75,10 +75,119 @@ define(['N/search', 'N/record'], function (search, record) {
     	}
     	
     	
-    }
+    };
+
+    var getUpdatedLinesFromSalesOrder = function(lastModifiedDate) {
+        var searchId = runtime.getCurrentScript().getParameter({name: 'custscript_csod_so_line_sync_src'});
+        var searchObject = search.load({id: searchId});
+
+        var error = {
+            error: 'Error occurred',
+            message: ''
+        };
+
+        if(lastModifiedDate === null || lastModifiedDate === undefined) {
+            error.message = 'Missing parameter';
+            return error;
+        }
+
+        var dataOut = [];
+
+        searchObject.filters.push(search.createFilter({
+            name: 'lastmodifieddate',
+            operator: search.Operator.ONORAFTER,
+            values: lastModifiedDate
+        }));
+
+        // run paginated search
+        var pagedSearch = searchObject.runPaged({
+            pageSize: 500
+        });
+
+        var searchResultCount = pagedSearch.count;
+
+        // push data to dataOut array
+        if(searchResultCount > 0) {
+            pagedSearch.pageRanges.forEach(function(pageRange) {
+                var fetchedData = pagedSearch.fetch({ index: pageRange.index });
+
+                fetchedData.data.forEach(function(result) {
+                    var tempObj = {};
+                    result.columns.forEach(function(col) {
+                        if(col.join) {
+                            tempObj[col.join + '_' + col.name] = result.getValue({ name: col.name, join: col.join });
+                        } else {
+                            tempObj[col.name] = result.getValue({ name: col.name, join: col.join });
+                        }
+                    });
+
+                    dataOut.push(tempObj);
+                });
+
+            });
+        }
+
+        return dataOut;
+
+    } ;
+
+    var getExchangeRateTable = function() {
+        var output = [];
+        var currencyrateSearchObj = search.create({
+            type: "currencyrate",
+            filters:
+                [
+                    ["basecurrency","anyof","1"],
+                    "AND",
+                    ["effectivedate","onorafter","daysago6"],
+                    "AND",
+                    ["formulanumeric: {transactioncurrency.id}","lessthanorequalto","26"]
+                ],
+            columns:
+                [
+                    search.createColumn({name: "basecurrency", label: "Base Currency"}),
+                    search.createColumn({
+                        name: "transactioncurrency",
+                        sort: search.Sort.ASC,
+                        label: "Transaction Currency"
+                    }),
+                    search.createColumn({name: "exchangerate", label: "Exchange Rate"}),
+                    search.createColumn({
+                        name: "effectivedate",
+                        sort: search.Sort.ASC,
+                        label: "Effective Date"
+                    })
+                ]
+        });
+        var searchResultCount = currencyrateSearchObj.runPaged().count;
+        log.debug("currencyrateSearchObj result count",searchResultCount);
+        currencyrateSearchObj.run().each(function(result){
+            var tempObj = {};
+            for(var i = 0; i < result.columns.length; i++) {
+                tempObj[result.columns[i].name] = result.getValue(result.columns[i]);
+            }
+
+            log.debug({
+                title: 'tempObj in searchResult',
+                details: tempObj
+            });
+
+            if(tempObj) {
+                output.push(tempObj);
+            }
+
+            return true;
+        });
+
+
+        return output;
+    };
+
 
     exports.getSalesForceID = getSalesForceID;
     exports.setNewPPDate = setNewPPDate;
+    exports.getUpdatedLinesFromSalesOrder = getUpdatedLinesFromSalesOrder;
+    exports.getExchangeRateTable = getExchangeRateTable;
 
     return exports;
 });
