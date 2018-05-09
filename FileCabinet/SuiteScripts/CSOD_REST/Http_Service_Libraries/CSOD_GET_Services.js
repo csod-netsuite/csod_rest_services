@@ -24,21 +24,24 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
             ],
             columns: [
                 "custentitysales_force_id",
-                "custentity_salesforce_name"
+                "custentity_salesforce_name",
+                "stage"
             ]
         });
         var searchResultCount = customerSearchObj.runPaged().count;
 
         if(searchResultCount > 0) {
             customerSearchObj.run().each(function(result){
-                // .run().each has a limit of 4,000 results
-                output['salesForceId'] = result.getValue({
-                    name: 'custentitysales_force_id'
-                });
 
-                output['salesForceName'] = result.getValue({
-                    name: 'custentity_salesforce_name'
-                });
+                if(result.getValue({name: 'stage'}) == 'CUSTOMER') {
+                    output['salesForceId'] = result.getValue({
+                        name: 'custentitysales_force_id'
+                    });
+
+                    output['salesForceName'] = result.getValue({
+                        name: 'custentity_salesforce_name'
+                    });
+                }
             });
         }
 
