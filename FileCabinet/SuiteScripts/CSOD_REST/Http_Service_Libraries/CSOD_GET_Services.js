@@ -48,6 +48,40 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
         return output;
     };
     
+    var getEmployee = function(externalid) {
+    	
+    	var output = {};
+    	
+    	var employeeSearchObj = search.create({
+    		type: "employee",
+    		filters: [
+    			["externalid", "anyof", externalid]
+    		],
+    		columns: [
+    			"email",
+    			"entityid",
+    			"externalid"
+    		]
+    	});
+    	var searchResultCount = employeeSearchObj.runPaged().count;
+    	
+    	if(searchResultCount > 0){
+    		employeeSearchObj.run().each(function(result){
+    			output['externalid'] = result.getValue({
+    				name: 'externalid'
+    			});
+    			output['employeename'] = result.getValue({
+    				name: 'entityid'
+    			});
+    			output['email'] = result.getValue({
+    				name: 'email'
+    			});
+    		});
+    				
+    	}
+    	return output;
+    }
+    
     var setNewPPDate = function(ppDate, deployId) {
     	
     	if(ppDate === undefined || ppDate === null || ppDate === '') {
@@ -191,6 +225,7 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
     exports.setNewPPDate = setNewPPDate;
     exports.getUpdatedLinesFromSalesOrder = getUpdatedLinesFromSalesOrder;
     exports.getExchangeRateTable = getExchangeRateTable;
+    exports.getEmployee = getEmployee;
 
     return exports;
 });
