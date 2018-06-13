@@ -94,8 +94,8 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
         		title: "RESTlet Action 8 - CHECK EMP ID Called",
         		details: context.action
         	});
-        	if(context.externalid){
-        		output = CSOD_GET.getEmployee(context.externalid);
+        	if(context.email){
+        		output = CSOD_GET.getEmployee(context.email);
         	}
         	else{
                 return error.create({

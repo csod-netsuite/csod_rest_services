@@ -48,14 +48,14 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
         return output;
     };
     
-    var getEmployee = function(externalid) {
+    var getEmployee = function(email) {
     	
     	var output = {};
     	
     	var employeeSearchObj = search.create({
     		type: "employee",
     		filters: [
-    			["externalid", "anyof", externalid]
+    			["email", "is", email]
     		],
     		columns: [
     			"email",
