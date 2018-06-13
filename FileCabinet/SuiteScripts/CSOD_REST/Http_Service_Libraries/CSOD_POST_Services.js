@@ -149,12 +149,19 @@ define(['N/https', './lodash', 'N/runtime', './moment', 'N/email'],
                     tempObj = _.assign(tempObj, storyObj);
                     // append latest date
                     tempObj['New_Latest_Updated_at'] = newLatestISOTime;
-                    output.push(tempObj);
+
+                    // @Developer NOTE : Added 6/12/2018
+                    // Check the flag before returning the output
+                    if(tempObj["01_SFDC Connector Flag_(sfdc)"].toLowerCase() !== "false") {
+                        output.push(tempObj);
+                    }
 
                 }
 
             }
         }
+
+
 
         log.audit({
             title: 'Output Length Check',

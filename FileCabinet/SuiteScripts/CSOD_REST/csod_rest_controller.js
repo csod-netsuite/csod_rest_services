@@ -98,7 +98,10 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
         		output = CSOD_GET.getEmployee(context.externalid);
         	}
         	else{
-        		return 'External ID is null';
+                return error.create({
+                    name: 'MISSING_REQ_ARG',
+                    message: 'Missing a required argument'
+                });
         	}
         }
 
