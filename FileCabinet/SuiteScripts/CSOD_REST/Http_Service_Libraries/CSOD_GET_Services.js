@@ -48,7 +48,7 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
         return output;
     };
     
-    var getEmployee = function(email) {
+    var getEmployee = function(email,externalid) {
     	
     	var output = {};
     	
@@ -67,18 +67,34 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
     	
     	if(searchResultCount > 0){
     		employeeSearchObj.run().each(function(result){
-    			output['externalid'] = result.getValue({
+    			var empExternalid = result.getValue({
     				name: 'externalid'
     			});
+    			
+    			if(externalid != empExternalid){
+    				record.submitFields({
+    					type: record.Type.EMPLOYEE,
+    					id: result.id,
+    					values: {
+    						externalid: externalid
+    					},
+    				    options: {
+    				        enableSourcing: false,
+    				        ignoreMandatoryFields : true
+    				    }
+    				});
+    				
+    			}
+    			output['externalid'] = externalid;
     			output['employeename'] = result.getValue({
     				name: 'entityid'
     			});
     			output['email'] = result.getValue({
     				name: 'email'
     			});
-    		});
-    				
+    		});		
     	}
+    	
     	return output;
     }
     
