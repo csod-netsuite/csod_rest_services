@@ -55,13 +55,20 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
     	var employeeSearchObj = search.create({
     		type: "employee",
     		filters: [
-    			["email", "is", email]
+                ["isinactive","is","F"],
+                "AND",
+                ["email", "is", email]
     		],
     		columns: [
-    			"email",
-    			"entityid",
-    			"externalid"
-    		]
+                search.createColumn({name: "email", label: "Email"}),
+                search.createColumn({name: "entityid", label: "Name"}),
+                search.createColumn({name: "externalid", label: "External ID"}),
+                search.createColumn({
+                    name: "datecreated",
+                    sort: search.Sort.DESC,
+                    label: "Date Created"
+                })
+            ]
     	});
     	var searchResultCount = employeeSearchObj.runPaged().count;
     	

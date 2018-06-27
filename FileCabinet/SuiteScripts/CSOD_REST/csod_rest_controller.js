@@ -92,7 +92,7 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
         } else if(context.action == ACTIONS.CHECK_EMP_ID) {
         	log.debug({
         		title: "RESTlet Action 8 - CHECK EMP ID Called",
-        		details: context.action
+        		details: context.email
         	});
         	if(context.email && context.externalid){
         		output = CSOD_GET.getEmployee(context.email,context.externalid);
