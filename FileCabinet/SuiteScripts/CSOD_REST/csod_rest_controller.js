@@ -25,7 +25,9 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
         UPDATE_PPDATE: '5',
         UPDATE_SO_LINE: '6',
         EX_RATE_ANAPLAN: '7',
-        CHECK_EMP_ID: '8'
+        CHECK_EMP_ID: '8',
+        TRAN_ID: '9',
+        UPDATE_SOID_SF: '10'
     };
 
     function _get(context) {
@@ -50,7 +52,10 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
             if(customerId !== ''){
                 output = CSOD_GET.getSalesForceID(customerId);
             } else {
-                output = { message: "Empty" }
+                output = {
+                    salesForceId: '',
+                    salesForceName: ''
+                };
             }
 
 
@@ -71,7 +76,7 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
                 title: "RESTlet Action 5 Called",
                 details: context.internalId
             });
-        	
+
         	const deployId = '8331';
         	output = CSOD_GET.setNewPPDate(context.ppdate, deployId);
 
@@ -103,6 +108,17 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
                     message: 'Missing a required argument'
                 });
         	}
+
+        } else if(context.action == ACTIONS.TRAN_ID) {
+            // Action to get Tran ID and Internal ID back to SF
+            log.debug("Action 9 Called");
+            if(context.internalId) {
+                output = CSOD_GET.getTranId(context.internalId);
+            }
+        } else if(context.action == ACTIONS.UPDATE_SOID_SF) {
+            // BOOMI Resquest to get SF IDs and NetSuite IDs to update SalesForce Opp-FEX Obj
+            log.debug("Action 10 Called");
+            output = CSOD_GET.getSalesOrderToUpdate();
         }
 
         // route to different method
@@ -117,7 +133,7 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
     function _post(requestBody) {
 
         var response = {};
-        
+
         // log.debug({
         //     title: 'resquestBody',
         //     details: requestBody

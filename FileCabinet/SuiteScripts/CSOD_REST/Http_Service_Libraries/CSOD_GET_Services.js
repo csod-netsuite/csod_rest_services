@@ -15,7 +15,10 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
 
     var getSalesForceID = function(internalId) {
 
-        var output = {};
+        var output = {
+            salesForceId: '',
+            salesForceName: ''
+        };
 
         var customerSearchObj = search.create({
             type: "customer",
@@ -47,11 +50,22 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
 
         return output;
     };
-    
+
     var getEmployee = function(email,externalid) {
-    	
-    	var output = {};
-    	
+
+    	var output = {
+            externalid: '',
+            employeename: '',
+            email: ''
+        };
+
+    	var preOutput = checkExternaldId(externalid, email);
+
+    	// externalId was found stop process and return
+    	if(preOutput.email) {
+    		return preOutput;
+    	}
+
     	var employeeSearchObj = search.create({
     		type: "employee",
     		filters: [
@@ -63,6 +77,7 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
                 search.createColumn({name: "email", label: "Email"}),
                 search.createColumn({name: "entityid", label: "Name"}),
                 search.createColumn({name: "externalid", label: "External ID"}),
+                search.createColumn({name: "issalesrep", label: "Sales Rep"}),
                 search.createColumn({
                     name: "datecreated",
                     sort: search.Sort.DESC,
@@ -71,27 +86,43 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
             ]
     	});
     	var searchResultCount = employeeSearchObj.runPaged().count;
-    	
+
     	if(searchResultCount > 0){
-    		employeeSearchObj.run().each(function(result){
+    		employeeSearchObj.run().each(function(result) {
+
+    		    var updateRecord = false;
+
     			var empExternalid = result.getValue({
     				name: 'externalid'
     			});
-    			
+
+    			var empRec = record.load({
+                    type: record.Type.EMPLOYEE,
+                    id: result.id
+                });
+
+    			if(!result.getValue({ name: 'issalesrep' })) {
+                    empRec.setValue({
+                        fieldId: 'issalesrep',
+                        value: true
+                    });
+
+                    updateRecord = true;
+                }
+
     			if(externalid != empExternalid){
-    				record.submitFields({
-    					type: record.Type.EMPLOYEE,
-    					id: result.id,
-    					values: {
-    						externalid: externalid
-    					},
-    				    options: {
-    				        enableSourcing: false,
-    				        ignoreMandatoryFields : true
-    				    }
-    				});
-    				
+                    empRec.setValue({
+                        fieldId: 'externalid',
+                        value: externalid
+                    });
+
+                    updateRecord = true;
     			}
+
+    			if(updateRecord) {
+    			    empRec.save();
+                }
+
     			output['externalid'] = externalid;
     			output['employeename'] = result.getValue({
     				name: 'entityid'
@@ -99,21 +130,34 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
     			output['email'] = result.getValue({
     				name: 'email'
     			});
-    		});		
+    		});
     	}
-    	
+
     	return output;
+    };
+
+    var getTranId = function(internalId) {
+        var tranId = search.lookupFields({
+            type: search.Type.SALES_ORDER,
+            id: internalId,
+            columns: 'tranid'
+        }).tranid;
+
+        return {
+        	tranId: tranId,
+        	internalId: internalId
+        }
     }
-    
+
     var setNewPPDate = function(ppDate, deployId) {
-    	
+
     	if(ppDate === undefined || ppDate === null || ppDate === '') {
     		return {
     			success: false,
     			message: "Missing PPDATE"
     		};
-    	} 
-    	
+    	}
+
     	var recordId = record.submitFields({
     		type: record.Type.SCRIPT_DEPLOYMENT,
     		id: deployId,
@@ -121,20 +165,20 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
     			custscript_csod_ml_lastest_updated_at: ppDate
     		}
     	});
-    	
+
     	log.debug({
     		title: "PPDATE Updated",
     		details: recordId
     	});
-    	
+
     	if(recordId) {
     		return {
     			success: true,
     			message: 'PPDATE Updated'
     		}
     	}
-    	
-    	
+
+
     };
 
     var getUpdatedLinesFromSalesOrder = function(lastModifiedDate) {
@@ -244,11 +288,128 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
     };
 
 
+    var getSalesOrderToUpdate = function() {
+
+    	var output = [];
+
+    	var salesorderSearchObj = search.create({
+    		   type: "salesorder",
+    		   filters:
+    		   [
+    		      ["type","anyof","SalesOrd"],
+    		      "AND",
+    		      ["mainline","is","T"],
+    		      "AND",
+    		      ["custbody_csod_created_by_webservice","is","F"],
+    		      "AND",
+    		      ["trandate","onorafter","7/1/2018"],
+    		      "AND",
+    		      ["custbody_csod_salesforce_is_updated","is","F"],
+    		      "AND",
+    		      [["custbody_salesforce_18_opp_id","isnotempty",""],"OR",["custbody7","isnotempty",""]],
+    		      "AND",
+    		      ["custbody7","isnot","n/a"]
+    		   ],
+    		   columns:
+    		   [
+    		      search.createColumn({name: "transactionnumber", label: "Transaction Number"}),
+    		      search.createColumn({name: "internalid", label: "Internal ID"}),
+    		      search.createColumn({name: "custbody_csod_created_by_webservice", label: "Created by Web Services"}),
+    		      search.createColumn({name: "custbody_salesforce_18_opp_id", label: "Salesforce 18-Ch. Opportunity ID"}),
+    		      search.createColumn({name: "custbody7", label: "Salesforce Incremental Opportunity ID (2)"})
+    		   ]
+    		});
+    		var searchResultCount = salesorderSearchObj.runPaged().count;
+    		log.debug("salesorderSearchObj result count",searchResultCount);
+    		salesorderSearchObj.run().each(function(result){
+    		   // .run().each has a limit of 4,000 results
+
+           var tempObj = {};
+           tempObj.SF_Opp_Id = result.getValue({name: "custbody7"});
+           tempObj.NS_Tran_Id = result.getValue({name: "transactionnumber"});
+           tempObj.NS_Internal_Id = result.getValue({name: "internalid"});
+
+           output.push(tempObj);
+
+    		   return true;
+    		});
+
+        return output;
+    }
+
+
+    /**
+     * UTILS
+     */
+
+    var checkExternaldId = function(externalId, email) {
+    	var employeeSearchObj = search.create({
+    		type: "employee",
+    		filters: [
+                ["externalid", "is", externalId]
+    		],
+    		columns: [
+                search.createColumn({name: "email", label: "Email"}),
+                search.createColumn({name: "entityid", label: "Name"}),
+                search.createColumn({name: "externalid", label: "External ID"}),
+                search.createColumn({name: "issalesrep", label: "Sales Rep"}),
+
+            ]
+    	});
+    	var searchResultCount = employeeSearchObj.runPaged().count;
+        var output = {
+            externalid: '',
+            employeename: '',
+            email: ''
+        };
+
+
+        if(searchResultCount > 0) {
+    		employeeSearchObj.run().each(function(result){
+
+				log.audit("External ID Detected", "Employee ID = " + result.id);
+
+				if(!result.getValue({name: 'issalesrep'})) {
+					record.submitFields({
+						type: record.Type.EMPLOYEE,
+						id: result.id,
+						values: {
+							issalesrep: true
+						}
+					});
+				}
+
+				if(!result.getValue({name: 'email'})) {
+					record.submitFields({
+						type: record.Type.EMPLOYEE,
+						id: result.id,
+						values: {
+							email: email
+						}
+					});
+				}
+
+				output['externalid'] = result.getValue({
+					name: 'externalid'
+				});
+    			output['employeename'] = result.getValue({
+    				name: 'entityid'
+    			});
+    			output['email'] = email;
+
+    		});
+    	}
+
+    	return output;
+    }
+
     exports.getSalesForceID = getSalesForceID;
     exports.setNewPPDate = setNewPPDate;
     exports.getUpdatedLinesFromSalesOrder = getUpdatedLinesFromSalesOrder;
     exports.getExchangeRateTable = getExchangeRateTable;
     exports.getEmployee = getEmployee;
+    exports.getTranId = getTranId;
+    exports.getSalesOrderToUpdate = getSalesOrderToUpdate;
 
     return exports;
 });
