@@ -302,13 +302,15 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
     		      "AND",
     		      ["custbody_csod_created_by_webservice","is","F"],
     		      "AND",
-    		      ["trandate","onorafter","7/1/2018"],
+    		      ["datecreated","onorafter","8/6/2018 12:00 am"],
     		      "AND",
     		      ["custbody_csod_salesforce_is_updated","is","F"],
     		      "AND",
     		      [["custbody_salesforce_18_opp_id","isnotempty",""],"OR",["custbody7","isnotempty",""]],
     		      "AND",
-    		      ["custbody7","isnot","n/a"]
+    		      ["custbody7","isnot","n/a"],
+    		      "AND",
+    		      ["internalidnumber","greaterthan","4418778"]
     		   ],
     		   columns:
     		   [
@@ -324,15 +326,22 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
     		salesorderSearchObj.run().each(function(result){
     		   // .run().each has a limit of 4,000 results
 
-           var tempObj = {};
-           tempObj.SF_Opp_Id = result.getValue({name: "custbody7"});
-           tempObj.NS_Tran_Id = result.getValue({name: "transactionnumber"});
-           tempObj.NS_Internal_Id = result.getValue({name: "internalid"});
-
-           output.push(tempObj);
-
-    		   return true;
-    		});
+	           var tempObj = {};
+	           
+	           var salesForceId = result.getValue({name: "custbody7"});
+	           
+	           if(!salesForceId) {
+	        	   salesForceId = result.getValue({name: "custbody_salesforce_18_opp_id"});
+	           }
+	           
+	           tempObj.SF_Opp_Id = salesForceId;
+	           tempObj.NS_Tran_Id = result.getValue({name: "transactionnumber"});
+	           tempObj.NS_Internal_Id = result.getValue({name: "internalid"});
+	
+	           output.push(tempObj);
+	
+	           return true;
+	    	});
 
         return output;
     }
