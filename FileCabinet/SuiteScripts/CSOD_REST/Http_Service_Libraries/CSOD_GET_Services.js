@@ -302,15 +302,13 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
     		      "AND",
     		      ["custbody_csod_created_by_webservice","is","F"],
     		      "AND",
-    		      ["datecreated","onorafter","8/6/2018 12:00 am"],
+    		      ["datecreated","onorafter","7/1/2018 12:00 am"],
     		      "AND",
     		      ["custbody_csod_salesforce_is_updated","is","F"],
     		      "AND",
     		      [["custbody_salesforce_18_opp_id","isnotempty",""],"OR",["custbody7","isnotempty",""]],
     		      "AND",
-    		      ["custbody7","isnot","n/a"],
-    		      "AND",
-    		      ["internalidnumber","greaterthan","4418778"]
+    		      ["custbody7","isnot","n/a"]
     		   ],
     		   columns:
     		   [
@@ -328,11 +326,7 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
 
 	           var tempObj = {};
 	           
-	           var salesForceId = result.getValue({name: "custbody7"});
-	           
-	           if(!salesForceId) {
-	        	   salesForceId = result.getValue({name: "custbody_salesforce_18_opp_id"});
-	           }
+	           var salesForceId = result.getValue({name: "custbody7"}) || result.getValue({name: "custbody_salesforce_18_opp_id"});
 	           
 	           tempObj.SF_Opp_Id = salesForceId;
 	           tempObj.NS_Tran_Id = result.getValue({name: "transactionnumber"});
@@ -344,6 +338,34 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
 	    	});
 
         return output;
+    }
+    
+    
+    var checkSalesOrderUpdateBox = function(internalId) {
+    	var output = {
+    			success: true,
+    			message: '',
+    			ns_id: internalId
+    	}
+    	
+    	try {
+    		record.submitFields({
+    			type: record.Type.SALES_ORDER,
+    			id: internalId,
+    			values: {
+    				custbody_csod_salesforce_is_updated: true
+    			}
+    		});
+    		
+    		output.message = 'All is well';
+    		
+    	} catch(e) {
+    		output.success = false;
+    		output.message = e;
+    	}
+    	
+    	return output;
+    	
     }
 
 
@@ -419,6 +441,7 @@ define(['N/search', 'N/record', 'N/runtime'], function (search, record, runtime)
     exports.getEmployee = getEmployee;
     exports.getTranId = getTranId;
     exports.getSalesOrderToUpdate = getSalesOrderToUpdate;
+    exports.checkSalesOrderUpdateBox = checkSalesOrderUpdateBox;
 
     return exports;
 });

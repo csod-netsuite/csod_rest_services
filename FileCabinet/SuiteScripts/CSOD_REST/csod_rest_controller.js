@@ -27,7 +27,8 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
         EX_RATE_ANAPLAN: '7',
         CHECK_EMP_ID: '8',
         TRAN_ID: '9',
-        UPDATE_SOID_SF: '10'
+        UPDATE_SOID_SF: '10',
+        UPDATE_SO_CHECKBOX: '11'
     };
 
     function _get(context) {
@@ -119,6 +120,12 @@ define(['N/error', './Http_Service_Libraries/CSOD_POST_Services', './Http_Servic
             // BOOMI Resquest to get SF IDs and NetSuite IDs to update SalesForce Opp-FEX Obj
             log.debug("Action 10 Called");
             output = CSOD_GET.getSalesOrderToUpdate();
+        } else if(context.action == ACTIONS.UPDATE_SO_CHECKBOX) {
+        	// Check custbody_csod_salesforce_is_updated field
+        	log.audit("Action 11 Called", "Updating SO ID = " + context.so_internal_id);
+        	
+        	output = CSOD_GET.checkSalesOrderUpdateBox(context.so_internal_id);	
+        	        	
         }
 
         // route to different method
